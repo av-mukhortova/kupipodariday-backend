@@ -9,7 +9,7 @@ export class HashingService {
   }
 
   async verifyHash(hash: string, password: string) {
-    const res = bcrypt.compare(hash, password);
+    const res = bcrypt.compare(password, hash);
     return res;
   }
 }
