@@ -17,10 +17,6 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  findAll() {
-    return this.usersRepository.find();
-  }
-
   findOne(field: string, value: string | number) {
     return this.usersRepository.findOneBy({ [field]: value });
   }
@@ -33,7 +29,17 @@ export class UsersService {
     return this.usersRepository.update({ [field]: value }, updateUserDto);
   }
 
-  removeOne(field: string, value: string | number) {
-    return this.usersRepository.delete({ [field]: value });
+  findAll(query: string) {
+    console.log('query' + query);
+    return this.usersRepository.find({
+      where: [
+        {
+          username: query,
+        },
+        {
+          email: query,
+        },
+      ],
+    });
   }
 }

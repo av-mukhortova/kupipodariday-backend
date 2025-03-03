@@ -4,39 +4,51 @@ import {
   Post,
   Body,
   Patch,
+  UseGuards,
+  Req,
   Param,
-  Delete,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtGuard } from '../guards/jwt.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @UseGuards(JwtGuard)
+  @Get('/me')
+  findOne(@Req() req) {
+    return this.usersService.findOne('id', +req.user.id);
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @UseGuards(JwtGuard)
+  @Get('/:username')
+  findOneByUsername(@Param('username') username: string) {
+    return this.usersService.findOne('username', username);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne('id', +id);
+  @UseGuards(JwtGuard)
+  @Patch('/me')
+  update(@Req() req, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.updateOne('id', +req.user.id, updateUserDto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.updateOne('id', +id, updateUserDto);
+  @UseGuards(JwtGuard)
+  @Get('/me/wishes')
+  findMyWishes(@Req() req) {
+    return '[]';
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.removeOne('id', +id);
+  @UseGuards(JwtGuard)
+  @Get('/:username/wishes')
+  findWishesByUsername(@Param('username') username: string) {
+    return '[]';
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('/find')
+  findAll(@Body() searchParams: { query: string }) {
+    return this.usersService.findAll(searchParams.query);
   }
 }
