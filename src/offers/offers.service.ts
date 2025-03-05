@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Offer } from './entities/offer.entity';
+import { Repository } from 'typeorm';
 import { CreateOfferDto } from './dto/create-offer.dto';
-import { UpdateOfferDto } from './dto/update-offer.dto';
+import { User } from '../users/entities/user.entity';
+import { Wish } from '../wishes/entities/wish.entity';
 
 @Injectable()
 export class OffersService {
-  create(createOfferDto: CreateOfferDto) {
-    return 'This action adds a new offer';
+  constructor(
+    @InjectRepository(Offer)
+    private offersRepository: Repository<Offer>,
+    @InjectRepository(Wish)
+    private wishesRepository: Repository<Wish>,
+  ) {}
+
+  async create(user: User, createOfferDto: CreateOfferDto) {
+    const wish = await this.wishesRepository.findOneBy({
+      id: +createOfferDto.itemId,
+    });
+    if (wish) {
+      const offer = this.offersRepository.create({
+        ...createOfferDto,
+        ...{ user: user, wish: wish },
+      });
+      return this.offersRepository.save(offer);
+    }
+    return null;
   }
 
   findAll() {
-    return `This action returns all offers`;
+    return this.offersRepository.find({
+      relations: ['user'],
+    });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} offer`;
-  }
-
-  update(id: number, updateOfferDto: UpdateOfferDto) {
-    return `This action updates a #${id} offer`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} offer`;
+    return this.offersRepository.findOneBy({ id });
   }
 }

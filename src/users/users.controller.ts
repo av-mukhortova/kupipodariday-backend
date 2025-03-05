@@ -37,18 +37,18 @@ export class UsersController {
   @UseGuards(JwtGuard)
   @Get('/me/wishes')
   findMyWishes(@Req() req) {
-    return '[]';
+    return this.usersService.findMyWishes(req.user);
   }
 
   @UseGuards(JwtGuard)
   @Get('/:username/wishes')
   findWishesByUsername(@Param('username') username: string) {
-    return '[]';
+    return this.usersService.findWishesByUsername(username);
   }
 
   @UseGuards(JwtGuard)
   @Post('/find')
-  findAll(@Body() searchParams: { query: string }) {
-    return this.usersService.findAll(searchParams.query);
+  findMany(@Body() searchParams: { query: string }) {
+    return this.usersService.findMany(searchParams.query);
   }
 }

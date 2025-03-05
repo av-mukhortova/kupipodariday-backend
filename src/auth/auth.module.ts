@@ -10,10 +10,12 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LocalStrategy } from 'src/local.strategy';
+import { Wish } from '../wishes/entities/wish.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([Wish]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

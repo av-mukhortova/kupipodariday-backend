@@ -4,12 +4,15 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Wish } from '../wishes/entities/wish.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(Wish)
+    private wishesRepository: Repository<Wish>,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -29,8 +32,7 @@ export class UsersService {
     return this.usersRepository.update({ [field]: value }, updateUserDto);
   }
 
-  findAll(query: string) {
-    console.log('query' + query);
+  findMany(query: string) {
     return this.usersRepository.find({
       where: [
         {
@@ -40,6 +42,27 @@ export class UsersService {
           email: query,
         },
       ],
+    });
+  }
+
+  findMyWishes(user: User) {
+    return this.wishesRepository.find({
+      where: {
+        owner: {
+          id: user.id,
+        },
+      },
+      relations: ['owner', 'offers'],
+    });
+  }
+  findWishesByUsername(username: string) {
+    return this.wishesRepository.find({
+      where: {
+        owner: {
+          username: username,
+        },
+      },
+      relations: ['owner', 'offers'],
     });
   }
 }

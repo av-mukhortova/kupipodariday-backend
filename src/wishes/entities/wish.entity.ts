@@ -60,9 +60,9 @@ export class Wish {
   })
   raised: number;
 
-  // user
+  // owner
   @ManyToOne(() => User, (user) => user.wishes)
-  user: User;
+  owner: User;
 
   // description
   @Column({

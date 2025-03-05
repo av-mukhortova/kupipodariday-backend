@@ -62,7 +62,7 @@ export class User {
   password: string;
 
   // wishes
-  @OneToMany(() => Wish, (wish) => wish.user)
+  @OneToMany(() => Wish, (wish) => wish.owner)
   wishes: Wish[];
 
   // offers
