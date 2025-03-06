@@ -49,14 +49,14 @@ export class Wish {
   // price
   @Column({
     type: 'numeric',
-    nullable: true,
+    default: 0,
   })
   price: number;
 
   // raised
   @Column({
     type: 'numeric',
-    nullable: true,
+    default: 0,
   })
   raised: number;
 
@@ -74,7 +74,7 @@ export class Wish {
   // copied
   @Column({
     type: 'integer',
-    nullable: true,
+    default: 0,
   })
   copied: number;
 

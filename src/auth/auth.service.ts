@@ -30,7 +30,7 @@ export class AuthService {
   }
 
   async validatePassword(username: string, password: string) {
-    const user = await this.usersService.findOne('username', username);
+    const user = await this.usersService.findOne('username', username, false);
 
     if (user) {
       const isMatched = await this.hashingService.verifyHash(

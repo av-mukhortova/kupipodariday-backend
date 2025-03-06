@@ -35,7 +35,6 @@ export class User {
   // about
   @Column({
     default: 'Пока ничего не рассказал о себе',
-    nullable: true,
   })
   @Length(2, 200)
   about: string;
@@ -70,6 +69,6 @@ export class User {
   offers: Offer[];
 
   // wishlists
-  @OneToMany(() => Wishlist, (wishlist) => wishlist.user)
+  @OneToMany(() => Wishlist, (wishlist) => wishlist.owner)
   wishlists: Wishlist[];
 }

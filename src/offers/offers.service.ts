@@ -24,7 +24,12 @@ export class OffersService {
         ...createOfferDto,
         ...{ user: user, wish: wish },
       });
-      return this.offersRepository.save(offer);
+      const res = await this.offersRepository.save(offer);
+      if (res) {
+        const raised = +wish.raised + +createOfferDto.amount;
+        await this.wishesRepository.update({ id: wish.id }, { raised });
+      }
+      return res;
     }
     return null;
   }

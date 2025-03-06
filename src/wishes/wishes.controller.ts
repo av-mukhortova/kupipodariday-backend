@@ -34,18 +34,27 @@ export class WishesController {
     return this.wishesService.findTop();
   }
 
+  @UseGuards(JwtGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.wishesService.findOne(+id);
   }
 
+  @UseGuards(JwtGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateWishDto: UpdateWishDto) {
     return this.wishesService.update(+id, updateWishDto);
   }
 
+  @UseGuards(JwtGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.wishesService.remove(+id);
+  }
+
+  @UseGuards(JwtGuard)
+  @Post(':id/copy')
+  copy(@Req() req, @Param('id') id: string) {
+    return this.wishesService.copy(req.user, +id);
   }
 }

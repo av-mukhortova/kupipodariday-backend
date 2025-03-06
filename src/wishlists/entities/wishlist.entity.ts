@@ -48,7 +48,7 @@ export class Wishlist {
 
   // user
   @ManyToOne(() => User, (user) => user.wishlists)
-  user: User;
+  owner: User;
 
   // items
   @OneToMany(() => Wish, (wish) => wish.wishlist)

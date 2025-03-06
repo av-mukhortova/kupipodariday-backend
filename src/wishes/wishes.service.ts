@@ -53,4 +53,19 @@ export class WishesService {
   remove(id: number) {
     return `This action removes a #${id} wish`;
   }
+
+  async copy(user: User, id: number) {
+    const wish = await this.findOne(id);
+    if (wish) {
+      await this.wishesRepository.update({ id }, { copied: +wish.copied + 1 });
+      return this.create(user, {
+        name: wish.name,
+        link: wish.link,
+        image: wish.image,
+        price: wish.price,
+        description: wish.description,
+      });
+    }
+    return null;
+  }
 }

@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Wish } from '../wishes/entities/wish.entity';
+import { HashingService } from 'src/hashing/hashing.service';
 
 @Injectable()
 export class UsersService {
@@ -13,6 +14,7 @@ export class UsersService {
     private usersRepository: Repository<User>,
     @InjectRepository(Wish)
     private wishesRepository: Repository<Wish>,
+    private hashingService: HashingService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -20,20 +22,38 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  findOne(field: string, value: string | number) {
-    return this.usersRepository.findOneBy({ [field]: value });
+  async findOne(
+    field: string,
+    value: string | number,
+    excludePassword = true,
+    excludeEmail = false,
+  ) {
+    const user = await this.usersRepository.findOneBy({ [field]: value });
+
+    if (excludePassword) delete user.password;
+    if (excludeEmail) delete user.email;
+    return user;
   }
 
-  updateOne(
+  async updateOne(
     field: string,
     value: string | number,
     updateUserDto: UpdateUserDto,
   ) {
-    return this.usersRepository.update({ [field]: value }, updateUserDto);
+    const hash = await this.hashingService.getHash(updateUserDto.password);
+    const res = {
+      username: updateUserDto.username,
+      password: hash,
+      email: updateUserDto.email,
+      about: updateUserDto.about,
+      avatar: updateUserDto.avatar,
+    };
+    await this.usersRepository.update({ [field]: value }, res);
+    return this.findOne(field, value, true);
   }
 
-  findMany(query: string) {
-    return this.usersRepository.find({
+  async findMany(query: string) {
+    const users = await this.usersRepository.find({
       where: [
         {
           username: query,
@@ -42,6 +62,10 @@ export class UsersService {
           email: query,
         },
       ],
+    });
+    return users.map((user) => {
+      delete user.password;
+      return user;
     });
   }
 
@@ -52,7 +76,16 @@ export class UsersService {
           id: user.id,
         },
       },
-      relations: ['owner', 'offers'],
+      relations: [
+        'owner',
+        'offers',
+        'offers.user',
+        /* 'offers.user.wishes',
+        'offers.user.offers', */
+        'offers.user.wishlists',
+        'offers.user.wishlists.owner',
+        'offers.user.wishlists.items',
+      ],
     });
   }
   findWishesByUsername(username: string) {
@@ -62,7 +95,15 @@ export class UsersService {
           username: username,
         },
       },
-      relations: ['owner', 'offers'],
+      relations: [
+        'offers',
+        'offers.user',
+        /* 'offers.user.wishes',
+        'offers.user.offers', */
+        'offers.user.wishlists',
+        'offers.user.wishlists.owner',
+        'offers.user.wishlists.items',
+      ],
     });
   }
 }
