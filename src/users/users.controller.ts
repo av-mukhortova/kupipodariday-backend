@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtGuard } from '../guards/jwt.guard';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 
 @Controller('users')
 export class UsersController {

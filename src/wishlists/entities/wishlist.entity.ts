@@ -32,13 +32,6 @@ export class Wishlist {
   @Length(1, 250)
   name: string;
 
-  // description
-  @Column({
-    nullable: true,
-  })
-  @Length(1, 1500)
-  description: string;
-
   // image
   @Column({
     nullable: true,

@@ -12,7 +12,7 @@ import {
 import { WishlistsService } from './wishlists.service';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
-import { JwtGuard } from '../guards/jwt.guard';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 
 @Controller('wishlistlists')
 export class WishlistsController {
@@ -24,6 +24,7 @@ export class WishlistsController {
     return this.wishlistsService.create(req.user, createWishlistDto);
   }
 
+  @UseGuards(JwtGuard)
   @Get()
   findAll() {
     return this.wishlistsService.findAll();

@@ -42,5 +42,5 @@ export class Offer {
 
   // wish
   @ManyToOne(() => Wish, (wish) => wish.offers)
-  wish: Wish;
+  item: Wish;
 }

@@ -79,7 +79,7 @@ export class Wish {
   copied: number;
 
   // offers
-  @OneToMany(() => Offer, (offer) => offer.wish)
+  @OneToMany(() => Offer, (offer) => offer.item)
   offers: Offer[];
 
   // wishlist

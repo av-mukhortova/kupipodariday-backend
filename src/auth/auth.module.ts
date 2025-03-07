@@ -5,11 +5,11 @@ import { UsersService } from 'src/users/users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { HashingService } from 'src/hashing/hashing.service';
-import { JwtStrategy } from 'src/jwt.strategy';
+import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { LocalStrategy } from 'src/local.strategy';
+import { LocalStrategy } from 'src/auth/strategies/local.strategy';
 import { Wish } from '../wishes/entities/wish.entity';
 
 @Module({
