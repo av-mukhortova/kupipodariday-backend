@@ -18,8 +18,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(jwtPayload: { sub: number }) {
-    const user = this.usersService.findOne('id', jwtPayload.sub, false);
+  async validate(jwtPayload: { sub: string }) {
+    const user = this.usersService.getByUsername(jwtPayload.sub, true);
     if (!user) {
       throw new UnauthorizedException();
     }

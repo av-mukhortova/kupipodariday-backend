@@ -13,24 +13,17 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const hash = await this.hashingService.getHash(createUserDto.password);
-    return this.usersService.create({
-      username: createUserDto.username,
-      password: hash,
-      email: createUserDto.email,
-      about: createUserDto.about,
-      avatar: createUserDto.avatar,
-    });
+  async createUser(createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
   }
 
   auth(user: User) {
-    const payload = { sub: user.id };
+    const payload = { sub: user.username };
     return { access_token: this.jwtService.sign(payload) };
   }
 
   async validatePassword(username: string, password: string) {
-    const user = await this.usersService.findOne('username', username, false);
+    const user = await this.usersService.getByUsername(username, true);
 
     if (user) {
       const isMatched = await this.hashingService.verifyHash(

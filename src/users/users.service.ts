@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { Repository, QueryFailedError } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Wish } from '../wishes/entities/wish.entity';
 import { HashingService } from 'src/hashing/hashing.service';
 
 @Injectable()
@@ -12,48 +11,89 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    @InjectRepository(Wish)
-    private wishesRepository: Repository<Wish>,
     private hashingService: HashingService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const user = this.usersRepository.create(createUserDto);
-    return this.usersRepository.save(user);
+    const hash = await this.hashingService.getHash(createUserDto.password);
+    try {
+      const user = await this.usersRepository.save({
+        ...createUserDto,
+        password: hash,
+      });
+      delete user.password;
+      return user;
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        const err = error.driverError;
+        if (err.code === '23505') {
+          throw new Error(
+            'Пользователь с таким email или username уже существует',
+          );
+        }
+      }
+    }
   }
 
-  async findOne(
-    field: string,
-    value: string | number,
-    excludePassword = true,
-    excludeEmail = false,
-  ) {
-    const user = await this.usersRepository.findOneBy({ [field]: value });
-
-    if (excludePassword) delete user.password;
-    if (excludeEmail) delete user.email;
-    return user;
+  getById(userId: number) {
+    return this.usersRepository.findOneBy({ id: userId });
   }
 
-  async updateOne(
-    field: string,
-    value: string | number,
-    updateUserDto: UpdateUserDto,
-  ) {
-    const hash = await this.hashingService.getHash(updateUserDto.password);
-    const res = {
-      username: updateUserDto.username,
-      password: hash,
-      email: updateUserDto.email,
-      about: updateUserDto.about,
-      avatar: updateUserDto.avatar,
-    };
-    await this.usersRepository.update({ [field]: value }, res);
-    return this.findOne(field, value, true);
+  getByUsername(username: string, withPassword = false) {
+    return this.usersRepository.findOne({
+      select: {
+        id: true,
+        username: true,
+        about: true,
+        avatar: true,
+        password: withPassword,
+      },
+      where: {
+        username,
+      },
+    });
   }
 
-  async findMany(query: string) {
-    const users = await this.usersRepository.find({
+  async updateOne(userId: number, updateUserDto: UpdateUserDto) {
+    const updatedUser = await this.usersRepository.findOne({
+      select: {
+        id: true,
+        username: true,
+        about: true,
+        avatar: true,
+        email: true,
+        password: true,
+      },
+      where: {
+        id: userId,
+      },
+    });
+    for (const key in updateUserDto) {
+      if (key === 'password') {
+        const hash = await this.hashingService.getHash(updateUserDto.password);
+        updatedUser[key] = hash;
+      } else {
+        updatedUser[key] = updateUserDto[key];
+      }
+    }
+    try {
+      const user = await this.usersRepository.save(updatedUser);
+      delete user.password;
+      return user;
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        const err = error.driverError;
+        if (err.code === '23505') {
+          throw new Error(
+            'Пользователь с таким email или username уже существует',
+          );
+        }
+      }
+    }
+  }
+
+  findManyUsers(query: string) {
+    return this.usersRepository.find({
       where: [
         {
           username: query,
@@ -63,47 +103,31 @@ export class UsersService {
         },
       ],
     });
-    return users.map((user) => {
-      delete user.password;
-      return user;
-    });
   }
 
-  findMyWishes(user: User) {
-    return this.wishesRepository.find({
+  async getMyWishes(userId: number) {
+    const user = await this.usersRepository.findOne({
       where: {
-        owner: {
-          id: user.id,
-        },
+        id: userId,
       },
-      relations: [
-        'owner',
-        'offers',
-        'offers.user',
-        /* 'offers.user.wishes',
-        'offers.user.offers', */
-        'offers.user.wishlists',
-        'offers.user.wishlists.owner',
-        'offers.user.wishlists.items',
-      ],
+      relations: {
+        wishes: true,
+      },
     });
+    return user.wishes;
   }
-  findWishesByUsername(username: string) {
-    return this.wishesRepository.find({
+
+  async getWishesByUsername(username: string) {
+    const user = await this.usersRepository.findOne({
       where: {
-        owner: {
-          username: username,
-        },
+        username,
       },
-      relations: [
-        'offers',
-        'offers.user',
-        /* 'offers.user.wishes',
-        'offers.user.offers', */
-        'offers.user.wishlists',
-        'offers.user.wishlists.owner',
-        'offers.user.wishlists.items',
-      ],
+      relations: {
+        wishes: true,
+        offers: true,
+      },
     });
+    if (!user) throw new Error('Пользователь не найден');
+    return user.wishes;
   }
 }

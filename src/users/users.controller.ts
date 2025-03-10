@@ -13,42 +13,37 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
 @Controller('users')
+@UseGuards(JwtGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @UseGuards(JwtGuard)
   @Get('/me')
   findOne(@Req() req) {
-    return this.usersService.findOne('id', +req.user.id);
+    return this.usersService.getById(+req.user.id);
   }
 
-  @UseGuards(JwtGuard)
   @Get('/:username')
   findOneByUsername(@Param('username') username: string) {
-    return this.usersService.findOne('username', username, true, true);
+    return this.usersService.getByUsername(username);
   }
 
-  @UseGuards(JwtGuard)
   @Patch('/me')
   update(@Req() req, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.updateOne('id', +req.user.id, updateUserDto);
+    return this.usersService.updateOne(+req.user.id, updateUserDto);
   }
 
-  @UseGuards(JwtGuard)
   @Get('/me/wishes')
-  findMyWishes(@Req() req) {
-    return this.usersService.findMyWishes(req.user);
+  getMyWishes(@Req() req) {
+    return this.usersService.getMyWishes(+req.user.id);
   }
 
-  @UseGuards(JwtGuard)
   @Get('/:username/wishes')
-  findWishesByUsername(@Param('username') username: string) {
-    return this.usersService.findWishesByUsername(username);
+  getWishesByUsername(@Param('username') username: string) {
+    return this.usersService.getWishesByUsername(username);
   }
 
-  @UseGuards(JwtGuard)
   @Post('/find')
-  findMany(@Body() searchParams: { query: string }) {
-    return this.usersService.findMany(searchParams.query);
+  findManyUsers(@Body() searchParams: { query: string }) {
+    return this.usersService.findManyUsers(searchParams.query);
   }
 }

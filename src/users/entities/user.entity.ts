@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { Length, IsEmail } from 'class-validator';
+import { Length, IsEmail, IsOptional, IsUrl } from 'class-validator';
 import { Wish } from '../../wishes/entities/wish.entity';
 import { Offer } from '../../offers/entities/offer.entity';
 import { Wishlist } from '../../wishlists/entities/wishlist.entity';
@@ -37,26 +37,27 @@ export class User {
     default: 'Пока ничего не рассказал о себе',
   })
   @Length(2, 200)
+  @IsOptional()
   about: string;
 
   // avatar
   @Column({
     default: 'https://i.pravatar.cc/300',
-    nullable: true,
   })
+  @IsUrl()
+  @IsOptional()
   avatar: string;
 
   // email
   @Column({
     unique: true,
-    nullable: true,
   })
   @IsEmail()
   email: string;
 
   // password
   @Column({
-    nullable: true,
+    select: false,
   })
   password: string;
 
