@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wishlist } from './entities/wishlist.entity';
 import { Repository } from 'typeorm';
@@ -6,6 +6,7 @@ import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { User } from '../users/entities/user.entity';
 import { Wish } from '../wishes/entities/wish.entity';
+import { validate } from 'class-validator';
 
 @Injectable()
 export class WishlistsService {
@@ -17,18 +18,18 @@ export class WishlistsService {
   ) {}
 
   async create(user: User, createWishlistDto: CreateWishlistDto) {
-    console.log(createWishlistDto);
-    const wishlist = this.wishlistsRepository.create({
-      ...createWishlistDto,
-      ...{ owner: user },
+    const wishList = await this.validate(createWishlistDto);
+    const items = createWishlistDto.itemsId.map(
+      (item): Wish | { id: number } => ({
+        id: item,
+      }),
+    );
+    const wishes = await this.wishesRepository.find({
+      where: items,
     });
-    const res = await this.wishlistsRepository.save(wishlist);
-    if (res) {
-      createWishlistDto.itemsId.forEach((id) => {
-        this.wishesRepository.update({ id }, { wishlist: res });
-      });
-    }
-    return res;
+    wishList.owner = user;
+    wishList.items = wishes;
+    return this.wishlistsRepository.save(wishList);
   }
 
   findAll() {
@@ -40,15 +41,71 @@ export class WishlistsService {
       where: {
         id: id,
       },
-      relations: ['owner', 'items'],
+      relations: {
+        owner: true,
+        items: true,
+      },
     });
   }
 
-  update(id: number, updateWishlistDto: UpdateWishlistDto) {
-    return `This action updates a #${id} wishlist`;
+  async update(
+    id: number,
+    updateWishlistDto: UpdateWishlistDto,
+    userId: number,
+  ) {
+    const wishList = await this.wishlistsRepository.findOne({
+      where: {
+        id,
+        owner: {
+          id: userId,
+        },
+      },
+      relations: {
+        owner: true,
+      },
+    });
+
+    for (const key in updateWishlistDto) {
+      if (key === 'itemsId') {
+        const items = updateWishlistDto[key].map((item) => {
+          return { id: item };
+        });
+        const wishes = await this.wishesRepository.find({
+          where: items,
+        });
+        wishList.items = wishes;
+      } else {
+        wishList[key] = updateWishlistDto[key];
+      }
+    }
+
+    return this.wishlistsRepository.save(wishList);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} wishlist`;
+  async remove(id: number, userId: number) {
+    const wishList = await this.wishlistsRepository.findOne({
+      where: {
+        id,
+        owner: {
+          id: userId,
+        },
+      },
+      relations: {
+        owner: true,
+      },
+    });
+    return await this.wishlistsRepository.remove(wishList);
+  }
+
+  private async validate(createWishlistDto: CreateWishlistDto) {
+    const wishList = new Wishlist();
+    for (const key in createWishlistDto) {
+      wishList[key] = createWishlistDto[key];
+    }
+    const errors = await validate(wishList, { whitelist: true });
+    if (errors.length > 0) {
+      throw new BadRequestException('Validation failed');
+    }
+    return wishList;
   }
 }
