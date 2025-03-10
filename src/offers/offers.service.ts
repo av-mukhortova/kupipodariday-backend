@@ -35,7 +35,7 @@ export class OffersService {
       const isCurrentUserWish =
         currentUser.wishes.filter((item) => item.id === wish.id).length > 0;
       if (!isCurrentUserWish) {
-        offer.user = user;
+        offer.user = currentUser;
         offer.item = wish;
         wish.raised = +wish.raised + +createOfferDto.amount;
         if (wish.raised <= wish.price) {

@@ -6,8 +6,9 @@ import {
   UpdateDateColumn,
   ManyToOne,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
-import { Length, IsUrl } from 'class-validator';
+import { Length, IsUrl, IsOptional } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
 import { Offer } from '../../offers/entities/offer.entity';
 import { Wishlist } from '../../wishlists/entities/wishlist.entity';
@@ -27,35 +28,30 @@ export class Wish {
   updatedAt: Date;
 
   // name
-  @Column({
-    nullable: true,
-  })
+  @Column()
   @Length(1, 250)
   name: string;
 
   // link
-  @Column({
-    nullable: true,
-  })
+  @Column()
+  @IsUrl()
   link: string;
 
   // image
-  @Column({
-    nullable: true,
-  })
+  @Column()
   @IsUrl()
   image: string;
 
   // price
   @Column({
-    type: 'numeric',
+    type: 'decimal',
     default: 0,
   })
   price: number;
 
   // raised
   @Column({
-    type: 'numeric',
+    type: 'decimal',
     default: 0,
   })
   raised: number;
@@ -65,10 +61,9 @@ export class Wish {
   owner: User;
 
   // description
-  @Column({
-    nullable: true,
-  })
+  @Column()
   @Length(1, 1024)
+  @IsOptional()
   description: string;
 
   // copied
@@ -83,6 +78,6 @@ export class Wish {
   offers: Offer[];
 
   // wishlist
-  @ManyToOne(() => Wishlist, (wishlist) => wishlist.items)
-  wishlist: Wishlist;
+  @ManyToMany(() => Wishlist, (wishlist) => wishlist.items)
+  wishlist: Wishlist[];
 }

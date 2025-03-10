@@ -6,7 +6,7 @@ import { Wish } from './entities/wish.entity';
 import { User } from '../users/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Wish]), TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([Wish, User])],
   controllers: [WishesController],
   providers: [WishesService],
 })

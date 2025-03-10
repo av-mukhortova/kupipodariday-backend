@@ -14,8 +14,7 @@ import { Wish } from '../wishes/entities/wish.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
-    TypeOrmModule.forFeature([Wish]),
+    TypeOrmModule.forFeature([User, Wish]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

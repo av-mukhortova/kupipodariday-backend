@@ -27,6 +27,7 @@ export class Offer {
   // amount
   @Column({
     type: 'decimal',
+    default: 0,
   })
   @IsNumber()
   amount: number;
