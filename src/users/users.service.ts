@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository, QueryFailedError } from 'typeorm';
@@ -27,7 +31,7 @@ export class UsersService {
       if (error instanceof QueryFailedError) {
         const err = error.driverError;
         if (err.code === '23505') {
-          throw new Error(
+          throw new ConflictException(
             'Пользователь с таким email или username уже существует',
           );
         }
@@ -84,7 +88,7 @@ export class UsersService {
       if (error instanceof QueryFailedError) {
         const err = error.driverError;
         if (err.code === '23505') {
-          throw new Error(
+          throw new ConflictException(
             'Пользователь с таким email или username уже существует',
           );
         }
@@ -127,7 +131,7 @@ export class UsersService {
         offers: true,
       },
     });
-    if (!user) throw new Error('Пользователь не найден');
+    if (!user) throw new BadRequestException('Пользователь не найден');
     return user.wishes;
   }
 }
