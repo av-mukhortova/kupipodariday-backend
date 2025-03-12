@@ -8,7 +8,7 @@ import {
   OneToMany,
   ManyToMany,
 } from 'typeorm';
-import { Length, IsUrl, IsOptional } from 'class-validator';
+import { Length, IsUrl, IsOptional, Min } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
 import { Offer } from '../../offers/entities/offer.entity';
 import { Wishlist } from '../../wishlists/entities/wishlist.entity';
@@ -43,15 +43,12 @@ export class Wish {
   image: string;
 
   // price
-  @Column({
-    type: 'decimal',
-    default: 0,
-  })
+  @Column('decimal')
+  @Min(1)
   price: number;
 
   // raised
-  @Column({
-    type: 'decimal',
+  @Column('decimal', {
     default: 0,
   })
   raised: number;

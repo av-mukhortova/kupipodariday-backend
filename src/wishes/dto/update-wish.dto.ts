@@ -1,4 +1,11 @@
-import { IsUrl, Length, IsString, IsNumber, IsOptional } from 'class-validator';
+import {
+  IsUrl,
+  Length,
+  IsString,
+  IsNumber,
+  IsOptional,
+  Min,
+} from 'class-validator';
 
 export class UpdateWishDto {
   @IsString()
@@ -18,6 +25,7 @@ export class UpdateWishDto {
 
   @IsNumber()
   @IsOptional()
+  @Min(1)
   price: number;
 
   @IsString()

@@ -21,6 +21,7 @@ export class UsersService {
   async create(createUserDto: CreateUserDto) {
     const hash = await this.hashingService.getHash(createUserDto.password);
     try {
+      if (!createUserDto.about) delete createUserDto.about; // с фронта всегда летит пустая строка, при этом у нас есть дефолтное значение - несостыковочка...
       const user = await this.usersRepository.save({
         ...createUserDto,
         password: hash,

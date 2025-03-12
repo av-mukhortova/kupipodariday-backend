@@ -1,4 +1,11 @@
-import { IsString, Length, IsUrl, IsEmail, IsOptional } from 'class-validator';
+import {
+  IsString,
+  Length,
+  IsUrl,
+  IsEmail,
+  IsOptional,
+  ValidateIf,
+} from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
@@ -12,7 +19,7 @@ export class CreateUserDto {
   password: string;
 
   @IsString()
-  @IsOptional()
+  @ValidateIf((_o, value) => value !== '')
   @Length(2, 200)
   about: string;
 

@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Wish } from '../../wishes/entities/wish.entity';
-import { IsBoolean, IsNumber } from 'class-validator';
+import { IsBoolean, Min } from 'class-validator';
 
 @Entity()
 export class Offer {
@@ -25,11 +25,8 @@ export class Offer {
   updatedAt: Date;
 
   // amount
-  @Column({
-    type: 'decimal',
-    default: 0,
-  })
-  @IsNumber()
+  @Column('decimal')
+  @Min(1)
   amount: number;
 
   // hidden

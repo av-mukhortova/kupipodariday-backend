@@ -6,7 +6,13 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { Length, IsEmail, IsOptional, IsUrl } from 'class-validator';
+import {
+  Length,
+  IsEmail,
+  IsOptional,
+  IsUrl,
+  ValidateIf,
+} from 'class-validator';
 import { Wish } from '../../wishes/entities/wish.entity';
 import { Offer } from '../../offers/entities/offer.entity';
 import { Wishlist } from '../../wishlists/entities/wishlist.entity';
@@ -38,6 +44,7 @@ export class User {
   })
   @Length(2, 200)
   @IsOptional()
+  @ValidateIf((_o, value) => value !== '')
   about: string;
 
   // avatar

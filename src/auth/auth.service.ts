@@ -18,8 +18,8 @@ export class AuthService {
   }
 
   auth(user: User) {
-    const payload = { sub: user.username };
-    return { access_token: this.jwtService.sign(payload) };
+    const payload = { sub: user.id };
+    return { access_token: this.jwtService.sign(payload, { expiresIn: '3d' }) };
   }
 
   async validatePassword(username: string, password: string) {
